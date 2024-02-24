@@ -2,16 +2,21 @@ import java.util.*;
 
 public class Solver {
 
-    private static final int[][] GOAL_STATE = {{0, 1, 2}, {3, 4, 5}, {6, 7, 8}};
+    private static final int[][] GOAL_STATE = {{0, 1, 2}, 
+                                              {3, 4, 5}, 
+                                              {6, 7, 8}};
     private static final int[][] MOVES = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}};
     //                                      Up      Down     Left    Right
     
-    private static final int[][] EASY = {{1, 2, 3}, {4, 5, 6}, {0, 7, 8}};
-    private static final int[][] MEDIUM = {{2, 3, 6}, {1, 0, 5}, {4, 7, 8}};
-    private static final int[][] HARD = {{5, 1, 3}, {0, 2, 6}, {4, 7, 8}};
+    private static final int[][] EASY = {{1, 2, 3}, 
+                                        {4, 5, 6}, 
+                                        {0, 7, 8}};
+    private static final int[][] HARD = {{5, 1, 3}, 
+                                        {0, 2, 6}, 
+                                        {4, 7, 8}};
 
     public static void main(String[] args) {
-        int[][] startState = EASY;
+        int[][] startState = HARD;
 
         Scanner scanner = new Scanner(System.in);
         System.out.println("Bienvenido al 8 Puzzle Solver");
