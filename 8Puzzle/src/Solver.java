@@ -25,7 +25,7 @@ public class Solver {
         System.out.println("Menu");
         System.out.println("[1] Algoritmo de Busqueda por anchura");
         System.out.println("[2] Algoritmo de Busqueda en profundidad");
-        System.out.println("[3] - Algoritmo de BPCU(Distancia Manhattan)");
+        System.out.println("[3] - Algoritmo de Distancia Manhattan");
         
         boolean picked = false;
         
