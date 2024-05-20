@@ -14,6 +14,7 @@ public class Solver {
     private static final int[][] HARD = {{5, 1, 3}, 
                                         {0, 2, 6}, 
                                         {4, 7, 8}};
+    private static int NODES = 0;
 
     public static void main(String[] args) {
         int[][] startState = HARD;
@@ -24,6 +25,7 @@ public class Solver {
         System.out.println("Menu");
         System.out.println("[1] Algoritmo de Busqueda por anchura");
         System.out.println("[2] Algoritmo de Busqueda en profundidad");
+        System.out.println("[3] - Algoritmo de BPCU(Distancia Manhattan)");
         
         boolean picked = false;
         
@@ -40,6 +42,10 @@ public class Solver {
             case 2:
             	picked = true;
                 solvePuzzle(startState, "P");
+                break;
+            case 3:
+            	picked = true;
+                solvePuzzle(startState, "DM");
                 break;
             default:
                 System.out.println("Ingrese una opcion valida");
@@ -62,6 +68,7 @@ public class Solver {
         List<int[][]> solution = switch (method) {
             case "A" -> bfs(initialState);
             case "P" -> dfs(initialState);
+            case "DM" -> DistanciaManhattan(initialState);
             default -> {
                 System.out.println("Error");
                 yield null;
@@ -76,6 +83,7 @@ public class Solver {
             solution.forEach(Solver::printBoardState);
             System.out.println("La solución se encontro en " + elapsedTime + " ms");
             System.out.println("El Numero de movimientos que se realizaron: " + searchCount);
+            System.out.println("Número de nodos generados: " + NODES);
         } else {
             System.out.println("No se encontro lo solucion");
         }
@@ -132,10 +140,15 @@ public class Solver {
         return searchDFS(startState);
     }
 
+    static List<int[][]> DistanciaManhattan(int[][] startState) {
+        return searchDM(startState);
+    }
+
     static List<int[][]> searchBFS(int[][] startState) {
         Queue<Node> queue = new LinkedList<>();
         Set<String> visited = new HashSet<>();
         queue.add(new Node(startState, null, 0));
+        NODES++;
 
         while (!queue.isEmpty()) {
             Node current = queue.poll();
@@ -150,6 +163,7 @@ public class Solver {
                 if (!visited.contains(successorStr)) {
                     queue.add(new Node(successor, current, 0));
                     visited.add(successorStr);
+                    NODES++;
                 }
             }
         }
@@ -161,6 +175,7 @@ public class Solver {
         Deque<Node> stack = new ArrayDeque<>();
         Set<String> visited = new HashSet<>();
         stack.push(new Node(startState, null, 0));
+        NODES++;
 
         while (!stack.isEmpty()) {
             Node current = stack.pop();
@@ -175,11 +190,59 @@ public class Solver {
                 if (!visited.contains(successorStr)) {
                     stack.push(new Node(successor, current, 0));
                     visited.add(successorStr);
+                    NODES++;
                 }
             }
         }
 
         return null;
+    }
+
+    //Funcion heuristica basada en la Distancia Manhattan para aplicar asi un costo
+    static List<int[][]> searchDM(int[][] startState) {
+        PriorityQueue<Node> queue = new PriorityQueue<>((n1, n2) -> Integer.compare(n1.cost, n2.cost));
+        Set<String> visited = new HashSet<>();
+        queue.add(new Node(startState, null, 0));
+        NODES++;
+
+        while (!queue.isEmpty()) {
+            Node current = queue.poll();
+            int[][] currentState = current.state;
+
+            if (isGoalState(currentState)) {
+                return buildPath(current);
+            }
+
+            for (int[][] successor : getSuccessorStates(currentState)) {
+                String successorStr = Arrays.deepToString(successor);
+                int heuristicCost = calculateManhattanDistance(successor); //Heurística de la distancia de Manhattan
+                int successorCost = current.cost + 1;
+
+                if (!visited.contains(successorStr) || successorCost < current.cost) {
+                    queue.add(new Node(successor, current, successorCost + heuristicCost)); //Sumar la heurística al costo acumulado
+                    visited.add(successorStr);
+                    NODES++;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    //Calcula la heurística de la distancia de Manhattan
+    static int calculateManhattanDistance(int[][] state) {
+        int distance = 0;
+        for (int i = 0; i < state.length; i++) {
+            for (int j = 0; j < state[i].length; j++) {
+                int value = state[i][j];
+                if (value != 0) {
+                    int targetRow = (value - 1) / state.length; //Fila en la que debería estar el número
+                    int targetCol = (value - 1) % state.length; //Columna en la que debería estar el número
+                    distance += Math.abs(i - targetRow) + Math.abs(j - targetCol);
+                }
+            }
+        }
+        return distance;
     }
 
     static List<int[][]> buildPath(Node end) {
